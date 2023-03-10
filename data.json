@@ -1,34 +1,12 @@
 [
   {
     "name": "Alice",
-    "age": 20
+    "age": 20,
+    "id": "6c0185fa-4537-4a4c-8c21-62971bb36b4d"
   },
   {
     "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
-  },
-  {
-    "name": "Alice",
-    "age": 20
+    "age": 20,
+    "id": "dc31e9fa-1d3d-4601-ab0d-d3a441482b45"
   }
 ]

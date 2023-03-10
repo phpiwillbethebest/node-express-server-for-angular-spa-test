@@ -1,43 +1,57 @@
 const express = require('express');
-const fs = require('fs').promises; //enable promises (or use)
+const fs = require('fs').promises;
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const { v4: uuidv4 } = require('uuid');
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-//enable cors
 app.use(cors());
-
-//parse request body
+app.use(helmet());
+app.use(morgan('common'));
 app.use(express.json());
 
-//get
+const dataFile = 'data.json';
+
 app.get('/data', async (req, res) => {
     try {
-        const data = await fs.readFile('data.json'); //read data.json
-        res.send(JSON.parse(data)); //send parsed json response
+        const data = await fs.readFile(dataFile);
+        const parsedData = JSON.parse(data);
+        res.status(200).json(parsedData);
     } catch (err) {
-        res.status(500).send(err);
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-//put
 app.put('/data', async (req, res) => {
-    const newData = req.body; //store data from client
-    const data = await fs.readFile('data.json'); //read data.json
-    let parsedData = JSON.parse(data); //parsed data from data.json
-    parsedData.push(newData); //push data from client in data from data.json
-
     try {
-        await fs.writeFile('data.json', JSON.stringify(parsedData, null, 2)); //write all data in data.json file
+        const newData = req.body;
 
-        let send = await fs.readFile('data.json'); //read data.json
-        send = JSON.parse(send); //parse data
-        res.send(send); //send it back to the client
+        const data = await fs.readFile(dataFile);
+        const parsedData = JSON.parse(data);
+
+        newData.id = uuidv4();
+        parsedData.push(newData);
+
+        await fs.writeFile(dataFile, JSON.stringify(parsedData, null, 2));
+
+        const updatedData = await fs.readFile(dataFile);
+        const parsedUpdatedData = JSON.parse(updatedData)
+
+        res.status(201).json(parsedUpdatedData);
     } catch (err) {
-        res.status(500).send(err);
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+app.use('*', (req, res) => {
+    res.status(404).json({ error: 'Not found' });
 });
 
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+    console.log(`Server is listening on port ${port}`);
 });
