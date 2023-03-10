@@ -1,25 +1,43 @@
 const express = require('express');
+const fs = require('fs').promises; //enable promises (or use)
 const cors = require('cors');
 const app = express();
+const port = 3000;
 
+//enable cors
 app.use(cors());
-app.use(express.json()); // Required to parse JSON in request body
 
-let data = [
-    { name: 'John', age: 30 },
-    { name: 'Jane', age: 25 },
-    { name: 'Bob', age: 40 }
-];
+//parse request body
+app.use(express.json());
 
-app.get('/data', (req, res) => {
-    res.json(data);
+//get
+app.get('/data', async (req, res) => {
+    try {
+        const data = await fs.readFile('data.json'); //read data.json
+        res.send(JSON.parse(data)); //send parsed json response
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
-app.put('/data', (req, res) => {
-    data.push(req.body);
-    res.json(data);
+//put
+app.put('/data', async (req, res) => {
+    const newData = req.body; //store data from client
+    const data = await fs.readFile('data.json'); //read data.json
+    let parsedData = JSON.parse(data); //parsed data from data.json
+    parsedData.push(newData); //push data from client in data from data.json
+
+    try {
+        await fs.writeFile('data.json', JSON.stringify(parsedData, null, 2)); //write all data in data.json file
+
+        let send = await fs.readFile('data.json'); //read data.json
+        send = JSON.parse(send); //parse data
+        res.send(send); //send it back to the client
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
-app.listen(3000, () => {
-    console.log('Server started on port 3000');
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });
